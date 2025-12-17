@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, StyleSheet, Pressable, LayoutAnimation, Platform } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 interface Task {
   id: string;
@@ -128,14 +128,14 @@ export function ExpandableCalendar({
   const toggleExpanded = () => {
     if (Platform.OS !== "web") {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      triggerHaptic.impact();
     }
     setIsExpanded(!isExpanded);
   };
 
   const handleDayPress = (day: number) => {
     if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      triggerHaptic.impact();
     }
     setSelectedDay(day);
     onDaySelect?.(day);

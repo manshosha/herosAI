@@ -14,7 +14,7 @@ import Animated, {
   withTiming,
   FadeInDown,
 } from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -89,7 +89,7 @@ export function MedicinesStories({
   }, [currentIndex]);
 
   const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     if (currentIndex < medicines.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
@@ -98,14 +98,14 @@ export function MedicinesStories({
   };
 
   const handlePrev = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
   };
 
   const handleTookThis = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    triggerHaptic.notification();
     handleNext();
   };
 

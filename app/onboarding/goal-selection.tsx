@@ -3,7 +3,7 @@ import { useState } from "react";
 import { StyleSheet, View, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -97,7 +97,7 @@ export default function GoalSelectionScreen() {
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
 
   const handleGoalToggle = (goalId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     setSelectedGoals((prev) => {
       if (prev.includes(goalId)) {
         return prev.filter((id) => id !== goalId);
@@ -110,7 +110,7 @@ export default function GoalSelectionScreen() {
 
   const handleContinue = () => {
     if (selectedGoals.length >= 2) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      triggerHaptic.notification();
       updateUniversal({ selectedGoals });
       router.push("/onboarding/q4-stroke-type" as any);
     }

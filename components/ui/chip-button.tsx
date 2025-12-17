@@ -1,4 +1,4 @@
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 import { Pressable, StyleSheet, PressableProps } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -15,7 +15,7 @@ export function ChipButton({ label, icon, selected = false, onPress, ...props }:
   const colorScheme = useColorScheme();
 
   const handlePress = (event: any) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     onPress?.(event);
   };
 

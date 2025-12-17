@@ -3,7 +3,7 @@ import { useState } from "react";
 import { StyleSheet, View, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -45,7 +45,7 @@ export default function ThemeScreen() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const handleSelect = (themeId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     setSelected(themeId);
   };
 

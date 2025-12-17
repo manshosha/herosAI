@@ -3,7 +3,7 @@ import { StyleSheet, View, ScrollView, Pressable, Dimensions, ImageBackground } 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 import { Image } from "expo-image";
 
 import { ThemedText } from "@/components/themed-text";
@@ -95,7 +95,7 @@ export default function TaskDetailScreen() {
 
   const handleComplete = async () => {
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      triggerHaptic.notification();
       await completeTask(task.id, task.duration);
       setIsCompleted(true);
       setTimeout(() => {

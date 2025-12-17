@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -34,7 +34,7 @@ export default function Q3ConditionScreen() {
   const { updateUniversal } = useOnboardingState();
 
   const handleSelect = (condition: ConditionType) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     setSelected(condition);
     updateUniversal({ condition });
   };

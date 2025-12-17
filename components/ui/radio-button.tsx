@@ -1,4 +1,4 @@
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { GlassCard } from "@/components/ui/glass-card";
@@ -17,7 +17,7 @@ export function RadioButton({ label, description, selected, onPress }: RadioButt
   const colorScheme = useColorScheme();
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     onPress();
   };
 

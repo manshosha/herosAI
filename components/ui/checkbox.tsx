@@ -1,4 +1,4 @@
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { GlassCard } from "@/components/ui/glass-card";
@@ -18,7 +18,7 @@ export function Checkbox({ label, icon, checked, onPress }: CheckboxProps) {
   const colorScheme = useColorScheme();
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     onPress();
   };
 

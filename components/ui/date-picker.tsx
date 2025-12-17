@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View, Pressable, Modal, ScrollView } from "react-native";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -31,7 +31,7 @@ export function DatePicker({ value, onChange, label = "Select Date" }: DatePicke
   const days = Array.from({ length: daysInMonth(selectedMonth, selectedYear) }, (_, i) => i + 1);
 
   const handleConfirm = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic.impact();
     onChange(new Date(selectedYear, selectedMonth, selectedDay));
     setShowPicker(false);
   };
@@ -44,7 +44,7 @@ export function DatePicker({ value, onChange, label = "Select Date" }: DatePicke
     <View style={styles.container}>
       <Pressable
         onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          triggerHaptic.impact();
           setShowPicker(true);
         }}
         style={({ pressed }) => [

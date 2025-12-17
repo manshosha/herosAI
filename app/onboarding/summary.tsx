@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useOnboardingState } from "@/hooks/use-onboarding-state";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ConfettiCannon from "react-native-confetti-cannon";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -28,8 +28,8 @@ export default function SummaryScreen() {
 
   const handleStart = async () => {
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
+      triggerHaptic.notification();
+
       // Save onboarding data
       await AsyncStorage.setItem("@onboarding_data", JSON.stringify(onboardingState.universal));
       await AsyncStorage.setItem("@welcome_screen_seen", "true");

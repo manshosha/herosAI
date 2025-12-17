@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 import * as Linking from "expo-linking";
 
 import { ThemedText } from "@/components/themed-text";
@@ -86,7 +86,7 @@ export function CelebrationPopup({
   useEffect(() => {
     if (visible) {
       // Trigger haptic feedback
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      triggerHaptic.notification();
 
       // Animate popup entrance
       scale.value = withSpring(1, {

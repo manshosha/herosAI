@@ -2,7 +2,6 @@ import { useRouter } from "expo-router";
 import { StyleSheet, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/themed-text";
@@ -10,13 +9,14 @@ import { ThemedView } from "@/components/themed-view";
 import { GlassCard } from "@/components/ui/glass-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { Colors, Spacing } from "@/constants/theme";
+import { triggerHaptic } from "@/utils/haptics";
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const handleGetStarted = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic.impact();
     router.push("/onboarding/welcome" as any);
   };
 

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -41,7 +41,7 @@ export default function GoalDetailScreen() {
   }
 
   const handleMilestonePress = (milestone: Milestone) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic.impact();
     router.push({
       pathname: "/milestone-detail",
       params: {
@@ -198,7 +198,7 @@ export default function GoalDetailScreen() {
           <PrimaryButton
             label="Start This Goal"
             onPress={() => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              triggerHaptic.notification();
               // Add goal to user's selected goals
             }}
           />

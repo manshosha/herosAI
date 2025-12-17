@@ -1,5 +1,5 @@
 import { StyleSheet, View, Pressable } from "react-native";
-import * as Haptics from "expo-haptics";
+import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
@@ -18,7 +18,7 @@ interface EmojiScaleProps {
 
 export function EmojiScale({ options, selected, onSelect }: EmojiScaleProps) {
   const handleSelect = (id: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic.impact();
     onSelect(id);
   };
 

@@ -1,9 +1,9 @@
-import * as Haptics from "expo-haptics";
 import { Pressable, StyleSheet, PressableProps, ActivityIndicator } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { BorderRadius, Colors, Spacing } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { triggerHaptic } from "@/utils/haptics";
 
 export type PrimaryButtonProps = PressableProps & {
   label: string;
@@ -23,7 +23,7 @@ export function PrimaryButton({
 
   const handlePress = (event: any) => {
     if (!disabled && !loading) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerHaptic.impact();
       onPress?.(event);
     }
   };
