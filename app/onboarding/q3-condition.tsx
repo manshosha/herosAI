@@ -12,7 +12,7 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { ConditionType } from "@/types/heros";
 import { useOnboardingState } from "@/hooks/use-onboarding-state";
 
-const conditions: Array<{ id: ConditionType; label: string; emoji: string; description: string }> = [
+const conditions: Array<{ id: ConditionType; label: string; emoji: string; description: string; disabled?: boolean }> = [
   {
     id: "stroke",
     label: "Stroke Recovery",
@@ -24,6 +24,7 @@ const conditions: Array<{ id: ConditionType; label: string; emoji: string; descr
     label: "Parkinson's Disease",
     emoji: "🎯",
     description: "Managing Parkinson's symptoms",
+    disabled: true,
   },
 ];
 
@@ -104,13 +105,15 @@ export default function Q3ConditionScreen() {
         <View style={styles.cardsContainer}>
           {conditions.map((condition) => {
             const isSelected = selected === condition.id;
+            const isDisabled = condition.disabled;
             return (
               <Pressable
                 key={condition.id}
-                onPress={() => handleSelect(condition.id)}
+                onPress={() => !isDisabled && handleSelect(condition.id)}
+                disabled={isDisabled}
                 style={({ pressed }) => [
                   styles.cardWrapper,
-                  pressed && styles.cardPressed,
+                  pressed && !isDisabled && styles.cardPressed,
                 ]}
               >
                 <GlassCard
@@ -120,10 +123,16 @@ export default function Q3ConditionScreen() {
                       borderColor: Colors.light.tint,
                       borderWidth: 2,
                     },
+                    isDisabled && styles.cardDisabled,
                   ]}
                 >
-                  <ThemedText style={styles.emoji}>{condition.emoji}</ThemedText>
-                  <ThemedText type="defaultSemiBold" style={styles.label}>
+                  <ThemedText style={[styles.emoji, isDisabled && styles.disabledText]}>
+                    {condition.emoji}
+                  </ThemedText>
+                  <ThemedText
+                    type="defaultSemiBold"
+                    style={[styles.label, isDisabled && styles.disabledText]}
+                  >
                     {condition.label}
                   </ThemedText>
                   <ThemedText
@@ -132,6 +141,7 @@ export default function Q3ConditionScreen() {
                       {
                         color: Colors.light.textSecondary,
                       },
+                      isDisabled && styles.disabledText,
                     ]}
                   >
                     {condition.description}
@@ -250,5 +260,11 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     borderTopWidth: 1,
     borderTopColor: "rgba(139, 127, 232, 0.1)",
+  },
+  cardDisabled: {
+    opacity: 0.5,
+  },
+  disabledText: {
+    opacity: 0.5,
   },
 });
