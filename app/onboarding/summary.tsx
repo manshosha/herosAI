@@ -1,10 +1,8 @@
 import { useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useOnboardingState } from "@/hooks/use-onboarding-state";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import ConfettiCannon from "react-native-confetti-cannon";
 import { triggerHaptic } from "@/utils/haptics";
 
 import { ThemedText } from "@/components/themed-text";
@@ -16,15 +14,7 @@ import { Colors, Spacing } from "@/constants/theme";
 export default function SummaryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const confettiRef = useRef<any>(null);
   const onboardingState = useOnboardingState();
-
-  useEffect(() => {
-    // Trigger confetti on mount
-    if (confettiRef.current) {
-      confettiRef.current.start();
-    }
-  }, []);
 
   const handleStart = async () => {
     try {
@@ -45,23 +35,6 @@ export default function SummaryScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ConfettiCannon
-        ref={confettiRef}
-        count={100}
-        origin={{ x: -10, y: 0 }}
-        autoStart={false}
-        fadeOut={true}
-        explosionSpeed={350}
-        fallSpeed={2500}
-        colors={[
-          Colors.light.tint,
-          Colors.light.secondary,
-          Colors.light.tertiary,
-          "#FF9A6C",
-          "#FFD700",
-        ]}
-      />
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
