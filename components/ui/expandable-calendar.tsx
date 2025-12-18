@@ -211,7 +211,7 @@ export function ExpandableCalendar({
 
   return (
     <LinearGradient
-      colors={["#FF8C5A", "#FF6B35", "#E85A2A"]}
+      colors={["#FFA500", "#FF8C00", "#FF7F00"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.9)",
   },
   selectedDayText: {
-    color: "#FF6B35",
+    color: "#FF8C00",
     fontWeight: "700",
   },
   todayText: {
