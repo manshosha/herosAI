@@ -80,7 +80,13 @@ export default function RootLayout() {
               <Stack.Screen name="index" />
               <Stack.Screen name="onboarding" />
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="modal" options={{ presentation: "modal", headerShown: true, title: "Modal" }} />
+              <Stack.Screen name="medicines-detail" />
+              <Stack.Screen name="mood-checkin" />
+              <Stack.Screen name="mood-level" />
+              <Stack.Screen
+                name="modal"
+                options={{ presentation: "modal", headerShown: true, title: "Modal" }}
+              />
               <Stack.Screen name="oauth/callback" />
             </Stack>
             <StatusBar style="auto" />

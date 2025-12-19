@@ -25,7 +25,8 @@ export default function WelcomeScreen() {
       {/* Background Gradient Circle */}
       <Animated.View entering={FadeIn.duration(1000)} style={styles.backgroundCircle}>
         <LinearGradient
-          colors={["#7C3AED", "#A78BFA"]}
+          // Use the primary orange gradient to match the app theme
+          colors={["#FF6B35", "#FFB089"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradientCircle}

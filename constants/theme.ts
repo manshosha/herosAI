@@ -5,10 +5,10 @@
 
 import { Platform } from "react-native";
 
-// Primary brand color - purple gradient
-const primaryPurple = "#7C3AED"; // Violet-600
-const primaryPurpleLight = "#A78BFA"; // Violet-400
-const primaryPurpleDark = "#5B21B6"; // Violet-800
+// Primary brand color - orange gradient (replaces previous purple)
+const primaryPurple = "#FF6B35"; // Orange-600
+const primaryPurpleLight = "#FFB089"; // Lighter orange
+const primaryPurpleDark = "#C8501F"; // Darker orange
 
 // Secondary accent - blue/teal
 const secondaryBlue = "#3B82F6"; // Blue-500

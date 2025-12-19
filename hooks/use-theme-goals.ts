@@ -101,11 +101,12 @@ export function useThemeGoals(recommendedThemes: Theme[]) {
       theme_11_emotional: "#BB8FCE", // Purple
       theme_12_walking_confidence: "#FF6B35", // Orange
       theme_14_hand_arm_advanced: "#45B7D1", // Blue
-      theme_15_strength_energy: "#F8B739", // Gold
-      theme_18_general: "#7C3AED", // Purple (default)
+      theme_15_strength_energy: "#FF6B35", // Orange
+      // Default/general theme should also use the primary orange
+      theme_18_general: "#FF6B35", // Orange (default)
     };
 
-    return themeColorMap[primaryTheme] || "#7C3AED";
+    return themeColorMap[primaryTheme] || "#FF6B35";
   }, [primaryTheme]);
 
   // Get theme name

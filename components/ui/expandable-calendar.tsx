@@ -211,9 +211,9 @@ export function ExpandableCalendar({
 
   return (
     <LinearGradient
-      colors={["#FF8C5A", "#FF6B35", "#E85A2A"]}
+      colors={["rgba(229, 92, 42, 1)", "rgba(255, 107, 53, 1)"]}
       start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      end={{ x: 1, y: 0 }}
       style={styles.container}
     >
       <Pressable onPress={toggleExpanded} style={styles.pressableArea}>

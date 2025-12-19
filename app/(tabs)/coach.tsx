@@ -1,118 +1,139 @@
-import { useState } from "react";
-import { StyleSheet, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { GlassCard } from "@/components/ui/glass-card";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { StoriesCarousel, Story } from "@/components/ui/stories-carousel";
+import { SocialPosts, SocialPost } from "@/components/ui/social-posts";
+import { Colors, Spacing } from "@/constants/theme";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 
-const MESSAGES = [
-  { id: "1", text: "Hi! I'm your AI wellness coach. How can I help you today?", isCoach: true },
+// Community stories data
+const COMMUNITY_STORIES: Story[] = [
+  {
+    id: "1",
+    author: "Community",
+    avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=40&h=40&fit=crop&crop=face",
+    fallback: "CM",
+    preview: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=533&fit=crop",
+    title: "Community Support",
+  },
+  {
+    id: "2",
+    author: "Sarah M.",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
+    fallback: "SM",
+    preview: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=300&h=533&fit=crop",
+    title: "Wellness Journey",
+  },
+  {
+    id: "3",
+    author: "Mike R.",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+    fallback: "MR",
+    preview: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=533&fit=crop",
+    title: "Daily Progress",
+  },
+  {
+    id: "4",
+    author: "Emma W.",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
+    fallback: "EW",
+    preview: "https://images.unsplash.com/photo-1490645935967-10de6ba1701f?w=300&h=533&fit=crop",
+    title: "Healthy Habits",
+  },
+];
+
+// Sample social media posts
+const COMMUNITY_POSTS: SocialPost[] = [
+  {
+    id: "1",
+    author: "Savannah Nguyen",
+    handle: "savannah_nguyen",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face",
+    fallback: "SN",
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=800&fit=crop",
+    likes: 120000,
+    comments: 96000,
+    shares: 36000,
+  },
+  {
+    id: "2",
+    author: "Brooklyn Simmons",
+    handle: "brooklyn.sim007",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
+    fallback: "BS",
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=800&fit=crop",
+    likes: 85000,
+    comments: 42000,
+    shares: 18000,
+  },
+  {
+    id: "3",
+    author: "Robert Fox",
+    handle: "robert_fox",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+    fallback: "RF",
+    image: "https://images.unsplash.com/photo-1490645935967-10de6ba1701f?w=600&h=800&fit=crop",
+    likes: 95000,
+    comments: 55000,
+    shares: 22000,
+  },
 ];
 
 export default function CoachScreen() {
   const insets = useSafeAreaInsets();
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState(MESSAGES);
-
-  const handleSend = () => {
-    if (!message.trim()) return;
-    setMessages([...messages, { id: Date.now().toString(), text: message, isCoach: false }]);
-    setMessage("");
-  };
+  const router = useRouter();
 
   return (
     <ThemedView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-        keyboardVerticalOffset={100}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.content,
-            {
-              paddingTop: Math.max(insets.top, 20) + Spacing.md,
-              paddingBottom: Spacing.md,
-              paddingHorizontal: Spacing.lg,
-            },
-          ]}
-        >
-          <View style={styles.header}>
-            <View style={styles.coachAvatar}>
-              <ThemedText style={styles.coachAvatarText}>🤖</ThemedText>
-            </View>
-            <View>
-              <ThemedText type="subtitle">AI Coach</ThemedText>
-              <ThemedText style={[styles.status, { color: Colors.light.success }]}>
-                ● Online
-              </ThemedText>
-            </View>
-          </View>
-
-          <View style={styles.messagesContainer}>
-            {messages.map((msg) => (
-              <View
-                key={msg.id}
-                style={[
-                  styles.messageBubble,
-                  msg.isCoach ? styles.coachBubble : styles.userBubble,
-                ]}
-              >
-                <ThemedText style={[styles.messageText, !msg.isCoach && { color: "#fff" }]}>
-                  {msg.text}
-                </ThemedText>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-
+        {/* Stories Carousel - At the top */}
         <View
           style={[
-            styles.inputContainer,
+            styles.storiesContainer,
             {
-              paddingBottom: Math.max(insets.bottom, 20),
-              paddingHorizontal: Spacing.lg,
+              paddingTop: Math.max(insets.top, 20) + Spacing.md,
+              paddingLeft: Math.max(insets.left, 20),
+              paddingRight: Math.max(insets.right, 20),
+              paddingBottom: Spacing.md,
             },
           ]}
         >
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              placeholder="Type your message..."
-              placeholderTextColor={Colors.light.textSecondary}
-              value={message}
-              onChangeText={setMessage}
-              multiline
-            />
-            <Pressable style={styles.sendButton} onPress={handleSend}>
-              <IconSymbol name="paperplane.fill" size={20} color="#fff" />
-            </Pressable>
-          </View>
+          <StoriesCarousel
+            stories={COMMUNITY_STORIES}
+            onStoryPress={(story) => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              // Navigate if route is provided (for action items)
+              if (story.route) {
+                router.push(story.route as any);
+              }
+            }}
+          />
         </View>
-      </KeyboardAvoidingView>
+
+        {/* Social Media Posts */}
+        <SocialPosts
+          posts={COMMUNITY_POSTS}
+          onPostPress={(post) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            // Handle post press if needed
+          }}
+        />
+      </ScrollView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  keyboardView: { flex: 1 },
-  scrollView: { flex: 1 },
-  content: { gap: Spacing.xl },
-  header: { flexDirection: "row", alignItems: "center", gap: Spacing.md },
-  coachAvatar: { width: 56, height: 56, borderRadius: BorderRadius.round, backgroundColor: Colors.light.surfaceSecondary, justifyContent: "center", alignItems: "center" },
-  coachAvatarText: { fontSize: 28, lineHeight: 32 },
-  status: { fontSize: 13, lineHeight: 18 },
-  messagesContainer: { gap: Spacing.md, marginTop: Spacing.lg },
-  messageBubble: { maxWidth: "80%", padding: Spacing.md, borderRadius: BorderRadius.medium },
-  coachBubble: { alignSelf: "flex-start", backgroundColor: Colors.light.surface },
-  userBubble: { alignSelf: "flex-end", backgroundColor: Colors.light.tint },
-  messageText: { fontSize: 15, lineHeight: 22 },
-  inputContainer: { paddingTop: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.light.borderLight },
-  inputWrapper: { flexDirection: "row", alignItems: "flex-end", gap: Spacing.sm, backgroundColor: Colors.light.surface, borderRadius: BorderRadius.medium, padding: Spacing.sm },
-  input: { flex: 1, fontSize: 15, lineHeight: 22, color: Colors.light.text, maxHeight: 100, paddingHorizontal: Spacing.sm },
-  sendButton: { width: 40, height: 40, borderRadius: BorderRadius.round, backgroundColor: Colors.light.tint, justifyContent: "center", alignItems: "center" },
+  container: { flex: 1, backgroundColor: "#f3efe7" },
+  scrollView: { flex: 1, backgroundColor: "#f3efe7" },
+  scrollContent: { flexGrow: 1, paddingBottom: Spacing.xl, backgroundColor: "#f3efe7" },
+  storiesContainer: {
+    backgroundColor: "#f3efe7",
+    marginBottom: Spacing.sm,
+  },
 });

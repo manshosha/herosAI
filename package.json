@@ -20,7 +20,12 @@
     "qr": "node scripts/generate_qr.mjs"
   },
   "dependencies": {
+    "...": "link:...",
     "@expo/vector-icons": "^15.0.3",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
@@ -66,6 +71,7 @@
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
     "superjson": "^1.13.3",
+    "three": "^0.182.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

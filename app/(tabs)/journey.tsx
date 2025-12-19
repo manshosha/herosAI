@@ -107,6 +107,18 @@ export default function JourneyScreen() {
           </LinearGradient>
         </View>
 
+        {/* Motivation just below overall progress */}
+        <View style={styles.motivationContainer}>
+          <ThemedText
+            style={[
+              styles.motivationText,
+              { color: Colors.light.textSecondary },
+            ]}
+          >
+            You're making great progress! Keep up the consistent effort and celebrate every milestone. 🎉
+          </ThemedText>
+        </View>
+
         {/* Goal Card */}
         <View style={styles.goalsContainer}>
           <GlassCard style={styles.goalCard}>
@@ -257,17 +269,6 @@ export default function JourneyScreen() {
           </GlassCard>
         </View>
 
-        {/* Motivation Section */}
-        <View style={styles.motivationContainer}>
-          <ThemedText
-            style={[
-              styles.motivationText,
-              { color: Colors.light.textSecondary },
-            ]}
-          >
-            You're making great progress! Keep up the consistent effort and celebrate every milestone. 🎉
-          </ThemedText>
-        </View>
       </ScrollView>
 
       {/* Task Group Modal */}

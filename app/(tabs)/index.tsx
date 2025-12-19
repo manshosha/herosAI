@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -10,7 +10,15 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  interpolate,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/themed-text";
@@ -20,7 +28,9 @@ import { PrimaryButton } from "@/components/ui/primary-button";
 import { TaskIcon } from "@/components/ui/task-icon";
 import { TaskGroupModal } from "@/components/ui/task-group-modal";
 import { ExpandableCalendar } from "@/components/ui/expandable-calendar";
-import { Colors, Spacing } from "@/constants/theme";
+import { StoriesCarousel, Story } from "@/components/ui/stories-carousel";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
+import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useOnboardingState } from "@/hooks/use-onboarding-state";
 import { useThemeGoals } from "@/hooks/use-theme-goals";
@@ -64,6 +74,66 @@ const DAILY_TASKS: Task[] = [
 const WEEK_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const WEEK_DATES = [17, 18, 19, 20, 21, 22, 23];
 
+// Sample stories data - includes action items (medications, mood check-in) and regular stories
+const SAMPLE_STORIES: Story[] = [
+  {
+    id: "medications",
+    author: "My Medications",
+    emoji: "💊",
+    title: "My Medications",
+    isAction: true,
+    route: "/medicines-detail",
+  },
+  {
+    id: "mood-checkin",
+    author: "Mood Check In",
+    emoji: "😊",
+    title: "Mood Check In",
+    isAction: true,
+    route: "/mood-checkin",
+  },
+  {
+    id: "1",
+    author: "Community",
+    avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=40&h=40&fit=crop&crop=face",
+    fallback: "CM",
+    preview: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=533&fit=crop",
+    title: "Community Support",
+  },
+  {
+    id: "2",
+    author: "Fitness Trainer",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face",
+    fallback: "FT",
+    preview: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=533&fit=crop",
+    title: "Daily Exercise",
+  },
+  {
+    id: "3",
+    author: "Nutrition Guide",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face",
+    fallback: "NG",
+    preview: "https://images.unsplash.com/photo-1490645935967-10de6ba1701f?w=300&h=533&fit=crop",
+    title: "Healthy Eating",
+  },
+  {
+    id: "4",
+    author: "Mindfulness",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face",
+    fallback: "MF",
+    preview: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=300&h=533&fit=crop",
+    title: "Breathing Tips",
+  },
+  {
+    id: "5",
+    author: "Progress Tracker",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face",
+    fallback: "PT",
+    preview: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=533&fit=crop",
+    title: "Your Journey",
+  },
+];
+
 // Utility function to adjust color brightness
 function adjustColorBrightness(color: string, percent: number): string {
   // Remove # if present
@@ -93,7 +163,7 @@ export default function TodayScreen() {
   const { universal, getRecommendedThemes } = useOnboardingState();
   const recommendedThemes = getRecommendedThemes();
   const { themeTasks, themeColor, themeName } = useThemeGoals(recommendedThemes);
-  const { completions } = useTaskCompletion();
+  const { completions, completeTask, isTaskCompleted } = useTaskCompletion();
   const [todayIndex, setTodayIndex] = useState(3); // Wednesday is today
   const [streakDays, setStreakDays] = useState(0);
   const [selectedTaskGroup, setSelectedTaskGroup] = useState<GroupedTasks | null>(null);
@@ -170,6 +240,177 @@ export default function TodayScreen() {
     </Pressable>
   );
 
+  // Task Notification Component for AnimatedList
+  const TaskNotification = ({
+    group,
+    onPress,
+  }: {
+    group: GroupedTasks | { type: string; label: string; tasks: any[] };
+    onPress: () => void;
+  }) => {
+    const getTaskIcon = (type: string) => {
+      const iconMap: Record<string, { emoji: string; color: string }> = {
+        ot_exercise: { emoji: "🏋️", color: "#FF6B35" },
+        pt_exercise: { emoji: "💪", color: "#45B7D1" },
+        speech_exercise: { emoji: "🗣️", color: "#E74C3C" },
+        cognitive_game: { emoji: "🧠", color: "#F7DC6F" },
+        podcast: { emoji: "🎧", color: "#9B59B6" },
+        meditation: { emoji: "🧘", color: "#52B788" },
+        chat: { emoji: "💬", color: "#3498DB" },
+      };
+      return iconMap[type] || { emoji: "📋", color: Colors.light.tint };
+    };
+
+    // Check if all tasks in group are completed
+    const allTasksCompleted = group.tasks.every((task: any) =>
+      isTaskCompleted(task.id || task.taskId)
+    );
+    const anyTaskCompleted = group.tasks.some((task: any) =>
+      isTaskCompleted(task.id || task.taskId)
+    );
+
+    const taskIcon = getTaskIcon(group.type);
+    const exerciseText = group.tasks.length === 1 ? "exercise" : "exercises";
+    const isChat = group.type === "chat";
+
+    // Animation values
+    const translateX = useSharedValue(0);
+    const checkmarkProgress = useSharedValue(allTasksCompleted ? 1 : 0);
+    const opacity = useSharedValue(allTasksCompleted ? 0.3 : 1);
+    const strikethroughWidth = useSharedValue(allTasksCompleted ? 1 : 0);
+
+    // Update animations when completion state changes
+    React.useEffect(() => {
+      if (allTasksCompleted) {
+        checkmarkProgress.value = withSpring(1);
+        opacity.value = withTiming(0.3, { duration: 300 });
+        strikethroughWidth.value = withTiming(1, { duration: 300 });
+      } else {
+        checkmarkProgress.value = withSpring(0);
+        opacity.value = withTiming(1, { duration: 300 });
+        strikethroughWidth.value = withTiming(0, { duration: 300 });
+      }
+    }, [allTasksCompleted]);
+
+    // Swipe gesture
+    const panGesture = Gesture.Pan()
+      .onUpdate((e) => {
+        translateX.value = e.translationX;
+      })
+      .onEnd((e) => {
+        if (e.translationX > 50) {
+          // Swipe right to complete
+          if (!allTasksCompleted) {
+            // Complete all tasks in group
+            group.tasks.forEach((task: any) => {
+              const taskId = task.id || task.taskId;
+              if (taskId && !isTaskCompleted(taskId)) {
+                completeTask(taskId, task.duration || 0);
+              }
+            });
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        }
+        translateX.value = withSpring(0);
+      });
+
+    const animatedContainerStyle = useAnimatedStyle(() => ({
+      transform: [{ translateX: translateX.value }],
+    }));
+
+    const animatedTextStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+    }));
+
+    const animatedStrikethroughStyle = useAnimatedStyle(() => ({
+      width: `${strikethroughWidth.value * 100}%`,
+    }));
+
+    const animatedCheckmarkStyle = useAnimatedStyle(() => ({
+      opacity: checkmarkProgress.value,
+      transform: [{ scale: checkmarkProgress.value }],
+    }));
+
+    const handleComplete = () => {
+      if (!allTasksCompleted) {
+        group.tasks.forEach((task: any) => {
+          const taskId = task.id || task.taskId;
+          if (taskId && !isTaskCompleted(taskId)) {
+            completeTask(taskId, task.duration || 0);
+          }
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    };
+
+    return (
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={[styles.taskNotification, animatedContainerStyle]}>
+          <Pressable
+            onPress={onPress}
+            style={styles.taskNotificationPressable}
+          >
+            <View style={styles.taskNotificationContent}>
+              {/* Checkbox */}
+              <Pressable
+                onPress={handleComplete}
+                style={styles.taskCheckboxContainer}
+              >
+                <Animated.View
+                  style={[
+                    styles.taskCheckbox,
+                    allTasksCompleted && styles.taskCheckboxCompleted,
+                    animatedCheckmarkStyle,
+                  ]}
+                >
+                  {allTasksCompleted && (
+                    <Animated.View style={animatedCheckmarkStyle}>
+                      <ThemedText style={styles.checkmark}>✓</ThemedText>
+                    </Animated.View>
+                  )}
+                </Animated.View>
+              </Pressable>
+
+              <View
+                style={[
+                  styles.taskNotificationIcon,
+                  { backgroundColor: taskIcon.color },
+                ]}
+              >
+                <ThemedText style={styles.taskNotificationEmoji}>
+                  {taskIcon.emoji}
+                </ThemedText>
+              </View>
+              <View style={styles.taskNotificationText}>
+                <View style={styles.taskNotificationHeader}>
+                  <Animated.View style={[styles.taskTitleContainer, animatedTextStyle]}>
+                    <ThemedText type="defaultSemiBold" style={styles.taskNotificationName}>
+                      {group.label}
+                    </ThemedText>
+                    <Animated.View
+                      style={[styles.strikethrough, animatedStrikethroughStyle]}
+                    />
+                  </Animated.View>
+                  {!isChat && (
+                    <>
+                      <ThemedText style={styles.taskNotificationDot}>·</ThemedText>
+                      <ThemedText style={styles.taskNotificationTime}>
+                        {group.tasks.length} {exerciseText}
+                      </ThemedText>
+                    </>
+                  )}
+                </View>
+                <ThemedText style={styles.taskNotificationDescription}>
+                  {isChat ? "Start a conversation" : "Tap to view exercises"}
+                </ThemedText>
+              </View>
+            </View>
+          </Pressable>
+        </Animated.View>
+      </GestureDetector>
+    );
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -177,6 +418,30 @@ export default function TodayScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Stories Carousel - At the top */}
+        <View
+          style={[
+            styles.storiesTopContainer,
+            {
+              paddingTop: Math.max(insets.top, 20) + Spacing.md,
+              paddingLeft: Math.max(insets.left, 20),
+              paddingRight: Math.max(insets.right, 20),
+              paddingBottom: Spacing.md,
+            },
+          ]}
+        >
+          <StoriesCarousel
+            stories={SAMPLE_STORIES}
+            onStoryPress={(story) => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              // Navigate if route is provided (for action items)
+              if (story.route) {
+                router.push(story.route as any);
+              }
+            }}
+          />
+        </View>
+
         {/* Theme-Based Gradient Hero Section */}
         <LinearGradient
           colors={[themeColor, adjustColorBrightness(themeColor, -0.25)]}
@@ -185,7 +450,7 @@ export default function TodayScreen() {
           style={[
             styles.heroSection,
             {
-              paddingTop: Math.max(insets.top, 20) + Spacing.md,
+              paddingTop: Spacing.md,
               paddingLeft: Math.max(insets.left, 20),
               paddingRight: Math.max(insets.right, 20),
               paddingBottom: Spacing.xl,
@@ -282,31 +547,6 @@ export default function TodayScreen() {
           </View>
         </LinearGradient>
 
-        {/* Quick Actions */}
-        <Pressable
-          onPress={() => router.push("/medicines-detail")}
-          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
-        >
-          <View
-            style={[
-              styles.quickActionsContainer,
-              {
-                paddingLeft: Math.max(insets.left, 20),
-                paddingRight: Math.max(insets.right, 20),
-              },
-            ]}
-          >
-            <GlassCard style={styles.medicinesCard}>
-              <View style={styles.medicineCardContent}>
-                <ThemedText style={styles.medicineIconLarge}>💊</ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.medicineLabel}>
-                  My Medications
-                </ThemedText>
-              </View>
-            </GlassCard>
-          </View>
-        </Pressable>
-
         {/* Daily Tasks Section */}
         <View
           style={[
@@ -348,50 +588,31 @@ export default function TodayScreen() {
             Today's Tasks
           </ThemedText>
 
-          <View style={styles.tasksList}>
-            {/* Chat Task */}
+          <View style={styles.tasksListContainer}>
+            {/* Chat Task if exists */}
             {displayTasks.find((t: any) => t.type === "chat") && (
-              <Animated.View entering={FadeInDown.delay(0).springify()}>
-                {renderTaskCard({ item: displayTasks.find((t: any) => t.type === "chat") })}
-              </Animated.View>
+              <AnimatedListItem key="chat">
+                <TaskNotification
+                  group={{
+                    type: "chat",
+                    label: "Community",
+                    tasks: [displayTasks.find((t: any) => t.type === "chat")],
+                  }}
+                  onPress={() => {
+                    const chatTask = displayTasks.find((t: any) => t.type === "chat");
+                    if (chatTask) handleTaskPress(chatTask);
+                  }}
+                />
+              </AnimatedListItem>
             )}
-
             {/* Grouped Exercise Tasks */}
-            {groupedDisplayTasks.map((group, index) => (
-              <Animated.View
-                key={group.type}
-                entering={FadeInDown.delay((index + 1) * 50).springify()}
-              >
-                <Pressable
+            {groupedDisplayTasks.map((group) => (
+              <AnimatedListItem key={group.type}>
+                <TaskNotification
+                  group={group}
                   onPress={() => handleTaskGroupPress(group)}
-                  style={({ pressed }) => [pressed && { opacity: 0.7 }]}
-                >
-                  <GlassCard style={styles.groupCard}>
-                    <View style={styles.groupCardContent}>
-                      <View style={styles.groupIconSection}>
-                        <TaskIcon type={group.type as any} size={44} />
-                      </View>
-                      <View style={styles.groupInfoSection}>
-                        <ThemedText type="defaultSemiBold" style={styles.groupTitle}>
-                          {group.label}
-                        </ThemedText>
-                        <ThemedText
-                          style={{
-                            fontSize: 16,
-                            lineHeight: 24,
-                            color: Colors.light.textSecondary,
-                          }}
-                        >
-                          {group.tasks.length} exercises
-                        </ThemedText>
-                      </View>
-                      <View style={styles.groupArrow}>
-                        <ThemedText style={styles.arrowText}>›</ThemedText>
-                      </View>
-                    </View>
-                  </GlassCard>
-                </Pressable>
-              </Animated.View>
+                />
+              </AnimatedListItem>
             ))}
           </View>
         </View>
@@ -417,6 +638,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  storiesTopContainer: {
+    backgroundColor: Colors.light.background,
+    marginBottom: Spacing.sm,
   },
   heroSection: {
     gap: Spacing.lg,
@@ -670,6 +895,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(124, 58, 237, 0.08)",
     borderRadius: 16,
     marginBottom: Spacing.md,
+    borderWidth: 5,
   },
   progressBarHeader: {
     flexDirection: "row",
@@ -686,17 +912,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 28,
     fontWeight: "700",
-    color: "#7C3AED",
+    color: Colors.light.tint,
   },
   progressBarBackground: {
     height: 8,
-    backgroundColor: "rgba(124, 58, 237, 0.2)",
+    backgroundColor: "rgba(255, 90, 31, 0.3)",
     borderRadius: 4,
     overflow: "hidden",
+    borderColor: "rgba(255, 140, 102, 0.05)",
   },
   progressBarFill: {
     height: "100%",
-    backgroundColor: "#7C3AED",
+    backgroundColor: Colors.light.tint,
     borderRadius: 4,
   },
   progressBarStats: {
@@ -712,6 +939,113 @@ const styles = StyleSheet.create({
   },
   tasksList: {
     gap: Spacing.md,
+  },
+  tasksListContainer: {
+    marginTop: Spacing.md,
+    minHeight: 400,
+    alignItems: "flex-start",
+  },
+  taskNotification: {
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "flex-start",
+    borderRadius: BorderRadius.large,
+    backgroundColor: Colors.light.background,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  taskNotificationPressable: {
+    width: "100%",
+  },
+  taskNotificationPressed: {
+    transform: [{ scale: 1.02 }],
+    opacity: 0.9,
+  },
+  taskNotificationContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  taskCheckboxContainer: {
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  taskCheckbox: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: Colors.light.border,
+    backgroundColor: Colors.light.backgroundSecondary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  taskCheckboxCompleted: {
+    backgroundColor: Colors.light.success,
+    borderColor: Colors.light.success,
+  },
+  checkmark: {
+    fontSize: 10,
+    lineHeight: 12,
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
+  taskTitleContainer: {
+    position: "relative",
+  },
+  strikethrough: {
+    position: "absolute",
+    left: 0,
+    top: "50%",
+    height: 2,
+    backgroundColor: Colors.light.text,
+    marginTop: -1,
+  },
+  taskNotificationIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.medium,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  taskNotificationEmoji: {
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  taskNotificationText: {
+    flex: 1,
+    gap: Spacing.xs / 2,
+  },
+  taskNotificationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
+  taskNotificationName: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: Colors.light.text,
+  },
+  taskNotificationDot: {
+    fontSize: 16,
+    color: Colors.light.textSecondary,
+  },
+  taskNotificationTime: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.light.textSecondary,
+  },
+  taskNotificationDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.light.textSecondary,
   },
   taskCard: {
     padding: Spacing.md,
