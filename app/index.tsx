@@ -14,27 +14,22 @@ export default function Index() {
       try {
         const hasSeenWelcome = await AsyncStorage.getItem("@welcome_screen_seen");
         const hasCompletedOnboarding = await AsyncStorage.getItem("@onboarding_completed");
-        
-        // First time: show welcome screen
+
         if (hasSeenWelcome !== "true") {
           router.replace("/welcome-screen" as any);
         }
-        // Second time: show onboarding
         else if (hasCompletedOnboarding !== "true") {
           router.replace("/onboarding/welcome" as any);
         }
-        // Already completed: show main app
         else {
           router.replace("/(tabs)/" as any);
         }
       } catch (error) {
         console.error("Error checking onboarding status:", error);
-        // Default to welcome screen if there's an error
         router.replace("/welcome-screen" as any);
       }
     };
 
-    // Delay navigation to ensure root layout is mounted
     const timer = setTimeout(checkOnboarding, 100);
 
     return () => clearTimeout(timer);
